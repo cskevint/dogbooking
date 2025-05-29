@@ -53,14 +53,14 @@ A full-featured platform connecting dog owners with pet sitters. Built with Next
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Authentication**: NextAuth.js
-- **Styling**: Tailwind CSS
-- **UI Components**: Headless UI
-- **Icons**: Heroicons
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/)
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **Authentication**: [NextAuth.js](https://next-auth.js.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [Headless UI](https://headlessui.com/)
+- **Icons**: [Heroicons](https://heroicons.com/)
 
 ## Project Structure
 
