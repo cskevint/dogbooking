@@ -82,16 +82,14 @@ A full-featured platform connecting dog owners with pet sitters. Built with Next
 
 ### Deploying with Vercel
 
-1. Push your code to a Git repository (GitHub, GitLab, or Bitbucket)
+1. [Import your repository](https://vercel.com/new) into Vercel
 
-2. [Import your repository](https://vercel.com/new) into Vercel
-
-3. Add the following environment variables in your Vercel project settings:
+2. Add the following environment variables in your Vercel project settings:
    - `DATABASE_URL` - Your production PostgreSQL connection string
    - `NEXTAUTH_URL` - Your production URL (e.g., https://your-app.vercel.app)
    - `NEXTAUTH_SECRET` - Your NextAuth secret key
 
-4. Configure your database:
+3. Configure your database:
    - Set up a PostgreSQL database (recommended providers: [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app))
    - Update the `DATABASE_URL` in Vercel with your production database connection string
    - Run migrations on your production database:
@@ -99,7 +97,7 @@ A full-featured platform connecting dog owners with pet sitters. Built with Next
      npx prisma migrate deploy
      ```
 
-5. Deploy your application:
+4. Deploy your application:
    - Vercel will automatically deploy your main branch
    - For subsequent updates, just push to your main branch and Vercel will automatically redeploy
 
