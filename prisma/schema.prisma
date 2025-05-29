@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole  @default(CLIENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  dogs          Dog[]
+  sitterProfile Sitter?
+  bookings      Booking[] @relation("ClientBookings")
+}
+
+enum UserRole {
+  CLIENT
+  SITTER
+  ADMIN
+}
+
+model Dog {
+  id          String   @id @default(cuid())
+  name        String
+  breed       String
+  age         Int
+  weight      Float
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Medical and behavioral information
+  vaccinated  Boolean  @default(false)
+  neutered    Boolean  @default(false)
+  friendly    Boolean  @default(true)
+  notes       String?  @db.Text
+  
+  bookings    Booking[]
+}
+
+model Sitter {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio         String?  @db.Text
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  rate        Float
+  capacity    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings    Booking[]
+  availability SitterAvailability[]
+}
+
+model SitterAvailability {
+  id        String   @id @default(cuid())
+  sitterId  String
+  sitter    Sitter   @relation(fields: [sitterId], references: [id], onDelete: Cascade)
+  dayOfWeek Int      // 0-6 for Sunday-Saturday
+  startTime String   // Format: HH:mm
+  endTime   String   // Format: HH:mm
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  startDate   DateTime
+  endDate     DateTime
+  status      BookingStatus @default(PENDING)
+  totalPrice  Float?
+  notes       String?       @db.Text
+  clientId    String
+  client      User          @relation("ClientBookings", fields: [clientId], references: [id])
+  sitterId    String
+  sitter      Sitter        @relation(fields: [sitterId], references: [id])
+  dogs        Dog[]
+  review      Review?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int
+  comment     String   @db.Text
+  bookingId   String   @unique
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
