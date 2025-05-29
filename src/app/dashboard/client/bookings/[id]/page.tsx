@@ -107,7 +107,7 @@ export default async function BookingPage({ params }: Props) {
             <div className="h-16 w-16 flex-shrink-0">
               <Image
                 className="h-16 w-16 rounded-full"
-                src={booking.sitter.user.image || '/default-avatar.png'}
+                src={booking.sitter.user.image || '/default-avatar.svg'}
                 alt={booking.sitter.user.name || ''}
                 width={64}
                 height={64}

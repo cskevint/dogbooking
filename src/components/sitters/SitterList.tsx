@@ -67,7 +67,7 @@ export default function SitterList({ sitters }: Props) {
             <div className="h-10 w-10 flex-shrink-0">
               <Image
                 className="h-10 w-10 rounded-full"
-                src={sitter.user.image || '/default-avatar.png'}
+                src={sitter.user.image || '/default-avatar.svg'}
                 alt={sitter.user.name}
                 width={40}
                 height={40}

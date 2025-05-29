@@ -48,7 +48,7 @@ export default async function SitterProfilePage() {
               <div className="col-span-full">
                 <div className="flex items-center gap-x-8">
                   <Image
-                    src={session.user.image || '/default-avatar.png'}
+                    src={session.user.image || '/default-avatar.svg'}
                     alt={session.user.name || ''}
                     width={96}
                     height={96}

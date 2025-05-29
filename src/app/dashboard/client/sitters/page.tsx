@@ -11,11 +11,8 @@ export const metadata: Metadata = {
   description: 'Search for available pet sitters in your area',
 }
 
-interface SearchParams {
-  city?: string
-  state?: string
-  maxRate?: string
-  minRating?: string
+type SearchParams = {
+  [key: string]: string | string[] | undefined
 }
 
 export default async function SittersPage({
@@ -29,12 +26,16 @@ export default async function SittersPage({
     redirect('/auth/signin')
   }
 
+  // Parse search params
+  const params = new URLSearchParams(await searchParams as Record<string, string>)
+  const city = params.get('city') || undefined
+  const state = params.get('state') || undefined
+  const maxRate = params.get('maxRate') ? Number(params.get('maxRate')) : undefined
+
   const where = {
-    ...(searchParams.city && { city: searchParams.city }),
-    ...(searchParams.state && { state: searchParams.state }),
-    ...(searchParams.maxRate && {
-      rate: { lte: parseFloat(searchParams.maxRate) },
-    }),
+    ...(city && { city }),
+    ...(state && { state }),
+    ...(maxRate && { rate: { lte: maxRate } }),
   }
 
   const sitters = await prisma.Sitter.findMany({
@@ -68,7 +69,7 @@ export default async function SittersPage({
       <div className="md:flex md:items-center md:justify-between">
         <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-            Find a Sitter
+            Select a Sitter
           </h2>
           <p className="mt-1 text-sm text-gray-500">
             Browse through our network of trusted pet sitters
@@ -77,7 +78,11 @@ export default async function SittersPage({
       </div>
 
       <div className="mt-4">
-        <SitterSearch defaultValues={searchParams} />
+        <SitterSearch defaultValues={{
+          city: city || '',
+          state: state || '',
+          maxRate: maxRate?.toString() || '',
+        }} />
       </div>
 
       <div className="mt-8">

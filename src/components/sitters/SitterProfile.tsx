@@ -69,7 +69,7 @@ export default function SitterProfile({ sitter, clientDogs }: Props) {
             <div className="sm:mr-6">
               <Image
                 className="h-24 w-24 rounded-full"
-                src={sitter.user.image || '/default-avatar.png'}
+                src={sitter.user.image || '/default-avatar.svg'}
                 alt={sitter.user.name}
                 width={96}
                 height={96}
@@ -139,7 +139,7 @@ export default function SitterProfile({ sitter, clientDogs }: Props) {
                       <div className="flex-shrink-0">
                         <Image
                           className="h-10 w-10 rounded-full"
-                          src={booking.client.image || '/default-avatar.png'}
+                          src={booking.client.image || '/default-avatar.svg'}
                           alt={booking.client.name}
                           width={40}
                           height={40}
