@@ -30,9 +30,9 @@ export default function SitterList({ sitters }: Props) {
   if (sitters.length === 0) {
     return (
       <div className="text-center py-12">
-        <h3 className="mt-2 text-sm font-semibold text-gray-900">No sitters found</h3>
+        <h3 className="mt-2 text-sm font-semibold text-gray-900">No sitters available</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Try adjusting your search criteria to find available sitters.
+          Check back later for available pet sitters.
         </p>
       </div>
     )

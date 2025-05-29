@@ -12,7 +12,6 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard/client' },
   { name: 'My Dogs', href: '/dashboard/client/dogs' },
   { name: 'Bookings', href: '/dashboard/client/bookings' },
-  { name: 'Find Sitters', href: '/dashboard/client/sitters' },
 ]
 
 function classNames(...classes: string[]) {

@@ -10,7 +10,11 @@ export interface Dog {
   name: string
   breed: string
   age: number
+  weight: number
+  size: string
   ownerId: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface Sitter {
