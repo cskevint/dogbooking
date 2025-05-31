@@ -94,7 +94,7 @@ export default function EditDogForm({ dog, onCancel }: Props) {
                 <input
                   type="text"
                   {...register('name')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
@@ -110,7 +110,7 @@ export default function EditDogForm({ dog, onCancel }: Props) {
                 <input
                   type="text"
                   {...register('breed')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
                 {errors.breed && (
                   <p className="mt-1 text-sm text-red-600">{errors.breed.message}</p>
@@ -126,7 +126,7 @@ export default function EditDogForm({ dog, onCancel }: Props) {
                 <input
                   type="number"
                   {...register('age', { valueAsNumber: true })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
                 {errors.age && (
                   <p className="mt-1 text-sm text-red-600">{errors.age.message}</p>
@@ -143,7 +143,7 @@ export default function EditDogForm({ dog, onCancel }: Props) {
                   type="number"
                   step="0.1"
                   {...register('weight', { valueAsNumber: true })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
                 {errors.weight && (
                   <p className="mt-1 text-sm text-red-600">{errors.weight.message}</p>
@@ -159,7 +159,7 @@ export default function EditDogForm({ dog, onCancel }: Props) {
                 <textarea
                   {...register('notes')}
                   rows={4}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   placeholder="Any special care instructions or additional information"
                 />
                 {errors.notes && (

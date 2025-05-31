@@ -85,7 +85,7 @@ export default function ReviewForm({ bookingId }: Props) {
             id="comment"
             name="comment"
             rows={4}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             required

@@ -7,8 +7,11 @@ import { z } from 'zod'
 const profileSchema = z.object({
   bio: z.string().min(20).max(500),
   rate: z.number().min(5).max(200),
+  address: z.string().min(5),
   city: z.string().min(2),
   state: z.string().length(2),
+  zipCode: z.string().min(5),
+  capacity: z.number().int().min(1).max(10),
 })
 
 export async function PUT(request: Request) {
@@ -23,7 +26,7 @@ export async function PUT(request: Request) {
     const body = profileSchema.parse(json)
 
     // Get the sitter's profile
-    const sitter = await prisma.Sitter.findUnique({
+    const sitter = await prisma.sitter.findUnique({
       where: {
         userId: session.user.id,
       },
@@ -34,15 +37,18 @@ export async function PUT(request: Request) {
     }
 
     // Update the sitter's profile
-    const updatedSitter = await prisma.Sitter.update({
+    const updatedSitter = await prisma.sitter.update({
       where: {
         id: sitter.id,
       },
       data: {
         bio: body.bio,
         rate: body.rate,
+        address: body.address,
         city: body.city,
         state: body.state,
+        zipCode: body.zipCode,
+        capacity: body.capacity,
       },
     })
 

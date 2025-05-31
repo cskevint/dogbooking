@@ -112,7 +112,7 @@ export default function BookingForm({ sitter, clientDogs, onCancel }: Props) {
                   type="checkbox"
                   value={dog.id}
                   {...register('dogIds')}
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  className="h-4 w-4 rounded border-gray-300 bg-white text-indigo-600 focus:ring-indigo-500"
                 />
               </div>
               <div className="ml-3 text-sm">
@@ -137,7 +137,7 @@ export default function BookingForm({ sitter, clientDogs, onCancel }: Props) {
             type="datetime-local"
             {...register('startDate')}
             min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
           {errors.startDate && (
             <p className="mt-2 text-sm text-red-600">{errors.startDate.message}</p>
@@ -152,7 +152,7 @@ export default function BookingForm({ sitter, clientDogs, onCancel }: Props) {
             type="datetime-local"
             {...register('endDate')}
             min={startDate || format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
           {errors.endDate && (
             <p className="mt-2 text-sm text-red-600">{errors.endDate.message}</p>
@@ -167,7 +167,7 @@ export default function BookingForm({ sitter, clientDogs, onCancel }: Props) {
         <textarea
           {...register('notes')}
           rows={4}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="mt-1 block w-full rounded-md border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           placeholder="Any special instructions or requirements"
         />
         {errors.notes && (
