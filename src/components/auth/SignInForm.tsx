@@ -27,7 +27,16 @@ export default function SignInForm() {
         return
       }
 
-      router.push('/dashboard/client')
+      // Fetch the session to get the user's role
+      const response = await fetch('/api/auth/session')
+      const session = await response.json()
+
+      // Redirect based on user role
+      if (session?.user?.role === 'SITTER') {
+        router.push('/dashboard/sitter')
+      } else {
+        router.push('/dashboard/client')
+      }
     } catch (err) {
       setError('An error occurred during sign in')
     }
