@@ -22,9 +22,9 @@ export async function POST(req: Request) {
     const json = await req.json()
     const body = signUpSchema.parse(json)
 
-    const { name, email, password, role } = body
+    const { name, email, password, role, bio, address, city, state, zipCode, rate, capacity } = body
 
-    const exists = await prisma.User.findUnique({
+    const exists = await prisma.user.findUnique({
       where: { email },
     })
 
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
 
     const hashedPassword = await hash(password, 10)
 
-    const user = await prisma.User.create({
+    const user = await prisma.user.create({
       data: {
         name,
         email,
@@ -47,16 +47,16 @@ export async function POST(req: Request) {
     })
 
     if (role === 'SITTER') {
-      await prisma.Sitter.create({
+      await prisma.sitter.create({
         data: {
           userId: user.id,
-          bio: '',
-          address: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          rate: 0,
-          capacity: 1,
+          bio: bio || '',
+          address: address || '',
+          city: city || '',
+          state: state || '',
+          zipCode: zipCode || '',
+          rate: rate || 0,
+          capacity: capacity || 1,
         },
       })
     }

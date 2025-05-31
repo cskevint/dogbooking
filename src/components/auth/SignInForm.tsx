@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function SignInForm() {
   const [email, setEmail] = useState('')
@@ -82,6 +83,16 @@ export default function SignInForm() {
         >
           Sign in
         </button>
+      </div>
+
+      <div className="text-center">
+        <span className="text-sm text-gray-600">Don't have an account? </span>
+        <Link
+          href="/auth/signup"
+          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+        >
+          Sign up
+        </Link>
       </div>
     </form>
   )

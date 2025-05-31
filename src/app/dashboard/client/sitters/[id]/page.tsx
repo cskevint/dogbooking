@@ -11,22 +11,52 @@ interface Props {
   }
 }
 
-interface BookingWithUser {
+interface Review {
+  id: string
+  rating: number
+  comment: string
+}
+
+interface Booking {
   id: string
   client: {
     name: string
     image: string | null
   }
-  review: {
-    id: string
-    rating: number
-    comment: string
-  } | null
+  review: Review | null
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const sitter = await prisma.Sitter.findUnique({
-    where: { id: params.id },
+interface Sitter {
+  id: string
+  bio: string
+  rate: number
+  city: string
+  state: string
+  user: {
+    id: string
+    name: string
+    email: string
+    image: string | null
+  }
+  _count: {
+    bookings: number
+  }
+  bookings: Booking[]
+}
+
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+  const {id} = await params
+
+  if (!id) {
+    return {
+      title: 'Sitter Not Found - DogBooking',
+    }
+  }
+
+  const sitter = await prisma.sitter.findUnique({
+    where: { id },
     include: {
       user: {
         select: {
@@ -43,21 +73,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${sitter.user.name} - Pet Sitter Profile - DogBooking`,
-    description: `View ${sitter.user.name}'s profile and book pet sitting services`,
+    title: `${sitter.user.name || 'Unknown'} - Pet Sitter Profile - DogBooking`,
+    description: `View ${sitter.user.name || 'Unknown'}'s profile and book pet sitting services`,
   }
 }
 
 export default async function SitterPage({ params }: Props) {
   const session = await getServerSession(authOptions)
+  const {id} = await params
 
   if (!session?.user?.id) {
     redirect('/auth/signin')
   }
 
-  const sitter = await prisma.Sitter.findUnique({
+  if (!id) {
+    notFound()
+  }
+
+  const sitter = await prisma.sitter.findUnique({
     where: {
-      id: params.id,
+      id,
     },
     include: {
       user: {
@@ -92,7 +127,13 @@ export default async function SitterPage({ params }: Props) {
               image: true,
             },
           },
-          review: true,
+          review: {
+            select: {
+              id: true,
+              rating: true,
+              comment: true,
+            },
+          },
         },
       },
     },
@@ -103,7 +144,7 @@ export default async function SitterPage({ params }: Props) {
   }
 
   // Get the client's dogs for the booking form
-  const dogs = await prisma.Dog.findMany({
+  const dogs = await prisma.dog.findMany({
     where: {
       ownerId: session.user.id,
     },
@@ -114,15 +155,33 @@ export default async function SitterPage({ params }: Props) {
   })
 
   // Transform the data to match the expected interface
-  const sitterWithClientInfo = {
-    ...sitter,
-    bookings: sitter.bookings.map((booking: BookingWithUser) => ({
-      ...booking,
+  const sitterWithClientInfo: Sitter = {
+    id: sitter.id,
+    bio: sitter.bio || '',
+    rate: sitter.rate,
+    city: sitter.city || '',
+    state: sitter.state || '',
+    user: {
+      id: sitter.user.id,
+      name: sitter.user.name || '',
+      email: sitter.user.email || '',
+      image: sitter.user.image,
+    },
+    _count: {
+      bookings: sitter._count.bookings,
+    },
+    bookings: sitter.bookings.map((booking) => ({
+      id: booking.id,
       client: {
-        name: booking.client.name,
+        name: booking.client.name || '',
         image: booking.client.image,
-      }
-    }))
+      },
+      review: booking.review ? {
+        id: booking.review.id,
+        rating: booking.review.rating,
+        comment: booking.review.comment,
+      } : null,
+    })),
   }
 
   return (
@@ -130,7 +189,7 @@ export default async function SitterPage({ params }: Props) {
       <div className="md:flex md:items-center md:justify-between">
         <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-            {sitter.user.name}
+            {sitter.user.name || 'Unknown'}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
             Pet Sitter Profile
