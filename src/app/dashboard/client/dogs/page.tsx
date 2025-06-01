@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -19,7 +19,7 @@ export default async function DogsPage() {
     redirect('/auth/signin')
   }
 
-  const dogs = await prisma.Dog.findMany({
+  const dogs = await prisma.dog.findMany({
     where: {
       ownerId: session.user.id,
     },
@@ -81,9 +81,6 @@ export default async function DogsPage() {
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Age
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Size
-                      </th>
                       <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                         <span className="sr-only">Edit</span>
                       </th>
@@ -97,13 +94,6 @@ export default async function DogsPage() {
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{dog.breed}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{dog.age} years</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {dog.size ? (
-                            dog.size.charAt(0).toUpperCase() + dog.size.slice(1).toLowerCase()
-                          ) : (
-                            'Not specified'
-                          )}
-                        </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <Link href={`/dashboard/client/dogs/${dog.id}`} className="text-indigo-600 hover:text-indigo-900">
                             View details<span className="sr-only">, {dog.name}</span>

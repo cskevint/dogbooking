@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -39,18 +39,24 @@ export default async function BookingsPage() {
     redirect('/auth/signin')
   }
 
-  const bookings = await prisma.Booking.findMany({
+  const bookings = await prisma.booking.findMany({
     where: {
       clientId: session.user.id,
     },
     include: {
-      dogs: true,
       sitter: {
         include: {
           user: true,
         },
       },
+      dogs: true,
       review: true,
+      client: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
     },
     orderBy: {
       startDate: 'desc',
@@ -98,7 +104,7 @@ export default async function BookingsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {bookings.map((booking: Booking) => (
+                  {bookings.map((booking) => (
                     <tr key={booking.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
                         <div className="flex items-center">
@@ -125,7 +131,7 @@ export default async function BookingsPage() {
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {booking.dogs.map((dog: Dog) => dog.name).join(', ')}
+                        {booking.dogs.map((dog) => dog.name).join(', ')}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <div className="flex items-center">

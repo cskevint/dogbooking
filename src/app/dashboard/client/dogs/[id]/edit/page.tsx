@@ -1,19 +1,20 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import EditDogWrapper from '@/components/dogs/EditDogWrapper'
 
+type tParams = Promise<{ id: string }>
+
 interface Props {
-  params: {
-    id: string
-  }
+  params: tParams
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const dog = await prisma.Dog.findUnique({
-    where: { id: params.id },
+  const { id } = await params
+  const dog = await prisma.dog.findUnique({
+    where: { id },
   })
 
   if (!dog) {
@@ -35,9 +36,10 @@ export default async function EditDogPage({ params }: Props) {
     redirect('/auth/signin')
   }
 
-  const dog = await prisma.Dog.findUnique({
+  const { id } = await params
+  const dog = await prisma.dog.findUnique({
     where: {
-      id: params.id,
+      id,
     },
   })
 

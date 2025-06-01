@@ -11,10 +11,13 @@ export interface Dog {
   breed: string
   age: number
   weight: number
-  size: string
   ownerId: string
   createdAt: Date
   updatedAt: Date
+  vaccinated: boolean
+  neutered: boolean
+  friendly: boolean
+  notes: string | null
 }
 
 export interface Sitter {
@@ -22,9 +25,14 @@ export interface Sitter {
   userId: string
   user: User
   bio: string | null
-  hourlyRate: number
-  availableFrom: Date
-  availableTo: Date
+  address: string
+  city: string
+  state: string
+  zipCode: string
+  rate: number
+  capacity: number
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface Review {
@@ -42,7 +50,7 @@ export interface Booking {
   startDate: Date
   endDate: Date
   status: BookingStatus
-  totalPrice: number
+  totalPrice: number | null
   dogs: Dog[]
   sitter: Sitter
   client: {

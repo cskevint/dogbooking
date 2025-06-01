@@ -1,14 +1,14 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import SitterProfile from '@/components/sitters/SitterProfile'
 import type { Metadata } from 'next'
 
+type tParams = Promise<{ id: string }>
+
 interface Props {
-  params: {
-    id: string
-  }
+  params: tParams
 }
 
 interface Review {
@@ -47,13 +47,7 @@ interface Sitter {
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const {id} = await params
-
-  if (!id) {
-    return {
-      title: 'Sitter Not Found - DogBooking',
-    }
-  }
+  const { id } = await params
 
   const sitter = await prisma.sitter.findUnique({
     where: { id },
@@ -80,14 +74,10 @@ export async function generateMetadata(
 
 export default async function SitterPage({ params }: Props) {
   const session = await getServerSession(authOptions)
-  const {id} = await params
+  const { id } = await params
 
   if (!session?.user?.id) {
     redirect('/auth/signin')
-  }
-
-  if (!id) {
-    notFound()
   }
 
   const sitter = await prisma.sitter.findUnique({

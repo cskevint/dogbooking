@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.id) {
@@ -11,9 +11,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { bookingId, rating, comment } = await request.json()
+    const json = await request.json()
+    const { bookingId, rating, comment } = json
 
-    // Validate input
     if (!bookingId || !rating || !comment) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     // Check if the booking exists and belongs to the user
-    const booking = await prisma.Booking.findUnique({
+    const booking = await prisma.booking.findUnique({
       where: {
         id: bookingId,
       },
@@ -41,8 +41,8 @@ export async function POST(request: Request) {
       return new NextResponse('Can only review completed bookings', { status: 400 })
     }
 
-    // Check if a review already exists
-    const existingReview = await prisma.Review.findUnique({
+    // Check if a review already exists for this booking
+    const existingReview = await prisma.review.findUnique({
       where: {
         bookingId,
       },
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     }
 
     // Create the review
-    const review = await prisma.Review.create({
+    const review = await prisma.review.create({
       data: {
         rating,
         comment,

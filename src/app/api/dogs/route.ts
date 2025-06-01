@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
@@ -15,45 +15,33 @@ const dogSchema = z.object({
   notes: z.string().optional(),
 })
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return new NextResponse(
-        JSON.stringify({ error: 'You must be logged in to add a dog' }),
-        { status: 401 }
-      )
-    }
-
-    if (session.user.role !== 'CLIENT') {
-      return new NextResponse(
-        JSON.stringify({ error: 'Only clients can add dogs' }),
-        { status: 403 }
-      )
+      return new NextResponse('Unauthorized', { status: 401 })
     }
 
     const json = await request.json()
     const body = dogSchema.parse(json)
 
-    const dog = await prisma.Dog.create({
+    const dog = await prisma.dog.create({
       data: {
-        ...body,
+        name: body.name,
+        breed: body.breed,
+        age: body.age,
+        weight: body.weight,
         ownerId: session.user.id,
       },
     })
 
-    return new NextResponse(JSON.stringify(dog), { status: 201 })
+    return NextResponse.json(dog)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return new NextResponse(JSON.stringify({ error: error.errors }), {
-        status: 400,
-      })
+      return new NextResponse(JSON.stringify(error.issues), { status: 422 })
     }
 
-    return new NextResponse(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500 }
-    )
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
 } 

@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
@@ -9,15 +9,16 @@ import ReviewForm from '@/components/bookings/ReviewForm'
 import CancelBookingButton from '@/components/bookings/CancelBookingButton'
 import type { Booking, Dog, BookingStatus } from '@/types'
 
+type tParams = Promise<{ id: string }>
+
 interface Props {
-  params: {
-    id: string
-  }
+  params: tParams
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const booking = await prisma.Booking.findUnique({
-    where: { id: params.id },
+  const { id } = await params
+  const booking = await prisma.booking.findUnique({
+    where: { id },
     include: {
       sitter: {
         include: {
@@ -61,9 +62,10 @@ export default async function BookingPage({ params }: Props) {
     redirect('/auth/signin')
   }
 
-  const booking = await prisma.Booking.findUnique({
+  const { id } = await params
+  const booking = await prisma.booking.findUnique({
     where: {
-      id: params.id,
+      id,
     },
     include: {
       dogs: true,
@@ -140,7 +142,7 @@ export default async function BookingPage({ params }: Props) {
               <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
                 <dt className="text-sm font-medium text-gray-500">Dogs</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">
-                  {booking.dogs.map((dog: Dog) => dog.name).join(', ')}
+                  {booking.dogs.map((dog) => dog.name).join(', ')}
                 </dd>
               </div>
               <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
@@ -158,7 +160,7 @@ export default async function BookingPage({ params }: Props) {
               <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
                 <dt className="text-sm font-medium text-gray-500">Total Price</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">
-                  ${booking.totalPrice.toFixed(2)}
+                  ${(booking.totalPrice || 0).toFixed(2)}
                 </dd>
               </div>
               {booking.review && (
@@ -171,7 +173,7 @@ export default async function BookingPage({ params }: Props) {
                           <svg
                             key={i}
                             className={`h-5 w-5 ${
-                              i < booking.review.rating
+                              i < (booking.review?.rating || 0)
                                 ? 'text-yellow-400'
                                 : 'text-gray-300'
                             }`}

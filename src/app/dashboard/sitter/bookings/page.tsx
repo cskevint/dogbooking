@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -41,7 +41,7 @@ export default async function SitterBookingsPage() {
   }
 
   // Get the sitter profile
-  const sitter = await prisma.Sitter.findUnique({
+  const sitter = await prisma.sitter.findUnique({
     where: {
       userId: session.user.id,
     },
@@ -52,7 +52,7 @@ export default async function SitterBookingsPage() {
     redirect('/dashboard/sitter/onboarding')
   }
 
-  const bookings = await prisma.Booking.findMany({
+  const bookings = await prisma.booking.findMany({
     where: {
       sitterId: sitter.id,
     },
@@ -65,26 +65,31 @@ export default async function SitterBookingsPage() {
       },
       dogs: true,
       review: true,
+      sitter: {
+        include: {
+          user: true,
+        },
+      },
     },
-    orderBy: [
-      {
-        status: 'asc',
-      },
-      {
-        startDate: 'desc',
-      },
-    ],
+    orderBy: {
+      startDate: 'desc',
+    },
   })
 
+  // Initialize groupedBookings with all possible statuses
+  const initialGroupedBookings: Record<BookingStatus, Booking[]> = {
+    PENDING: [],
+    CONFIRMED: [],
+    COMPLETED: [],
+    CANCELLED: [],
+  }
+
   // Group bookings by status
-  const groupedBookings = bookings.reduce((acc: Record<BookingStatus, Booking[]>, booking: Booking) => {
-    const status = booking.status
-    if (!acc[status]) {
-      acc[status] = []
-    }
+  const groupedBookings = bookings.reduce((acc, booking) => {
+    const status = booking.status as BookingStatus
     acc[status].push(booking)
     return acc
-  }, {} as Record<BookingStatus, Booking[]>)
+  }, initialGroupedBookings)
 
   const statusOrder: BookingStatus[] = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED']
 
@@ -130,7 +135,7 @@ export default async function SitterBookingsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {groupedBookings[status]?.map((booking: Booking) => (
+                    {groupedBookings[status].map((booking: Booking) => (
                       <tr key={booking.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
                           <div className="flex items-center">
@@ -169,7 +174,7 @@ export default async function SitterBookingsPage() {
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          ${booking.totalPrice.toFixed(2)}
+                          ${(booking.totalPrice || 0).toFixed(2)}
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <BookingActions booking={booking} />

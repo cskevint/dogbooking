@@ -1,13 +1,15 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import type { BookingStatus } from '@/types'
 
+type tParams = Promise<{ id: string }>
+
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  { params }: { params: tParams }
+): Promise<Response | void> {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.id) {
@@ -15,12 +17,12 @@ export async function POST(
   }
 
   try {
-    const bookingId = params.id
+    const { id } = await params
 
     // Check if the booking exists and belongs to the user
-    const booking = await prisma.Booking.findUnique({
+    const booking = await prisma.booking.findUnique({
       where: {
-        id: bookingId,
+        id,
       },
     })
 
@@ -42,9 +44,9 @@ export async function POST(
     }
 
     // Cancel the booking
-    const updatedBooking = await prisma.Booking.update({
+    const updatedBooking = await prisma.booking.update({
       where: {
-        id: bookingId,
+        id,
       },
       data: {
         status: 'CANCELLED',

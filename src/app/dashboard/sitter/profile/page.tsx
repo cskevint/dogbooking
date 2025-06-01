@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
@@ -18,7 +18,7 @@ export default async function SitterProfilePage() {
     redirect('/auth/signin')
   }
 
-  const sitter = await prisma.Sitter.findUnique({
+  const sitter = await prisma.sitter.findUnique({
     where: {
       userId: session.user.id,
     },

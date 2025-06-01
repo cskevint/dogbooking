@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     const totalPrice = hours * sitter.rate
 
     // Create the booking
-    const booking = await prisma.Booking.create({
+    const booking = await prisma.booking.create({
       data: {
         startDate,
         endDate,

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+
+type tParams = Promise<{ id: string }>
 
 const dogSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -17,7 +19,7 @@ const dogSchema = z.object({
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: tParams }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -29,9 +31,11 @@ export async function PATCH(
       )
     }
 
-    const dog = await prisma.Dog.findUnique({
+    const { id } = await params
+
+    const dog = await prisma.dog.findUnique({
       where: {
-        id: params.id,
+        id,
       },
     })
 
@@ -45,9 +49,9 @@ export async function PATCH(
     const json = await request.json()
     const body = dogSchema.parse(json)
 
-    const updatedDog = await prisma.Dog.update({
+    const updatedDog = await prisma.dog.update({
       where: {
-        id: params.id,
+        id,
       },
       data: body,
     })
@@ -70,7 +74,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: tParams }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -82,9 +86,11 @@ export async function DELETE(
       )
     }
 
-    const dog = await prisma.Dog.findUnique({
+    const { id } = await params
+
+    const dog = await prisma.dog.findUnique({
       where: {
-        id: params.id,
+        id,
       },
     })
 
@@ -95,9 +101,9 @@ export async function DELETE(
       )
     }
 
-    await prisma.Dog.delete({
+    await prisma.dog.delete({
       where: {
-        id: params.id,
+        id,
       },
     })
 

@@ -4,26 +4,16 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { StarIcon } from '@heroicons/react/20/solid'
 import { MapPinIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline'
+import type { Sitter } from '@/types'
 
-interface Sitter {
-  id: string
-  bio: string
-  rate: number
-  city: string
-  state: string
-  user: {
-    id: string
-    name: string
-    email: string
-    image: string | null
-  }
+interface SitterWithCount extends Sitter {
   _count: {
     bookings: number
   }
 }
 
 interface Props {
-  sitters: Sitter[]
+  sitters: SitterWithCount[]
 }
 
 export default function SitterList({ sitters }: Props) {
@@ -68,7 +58,7 @@ export default function SitterList({ sitters }: Props) {
               <Image
                 className="h-10 w-10 rounded-full"
                 src={sitter.user.image || '/default-avatar.svg'}
-                alt={sitter.user.name}
+                alt={sitter.user.name || ''}
                 width={40}
                 height={40}
               />

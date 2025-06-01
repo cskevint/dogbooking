@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 const profileSchema = z.object({
@@ -14,7 +14,7 @@ const profileSchema = z.object({
   capacity: z.number().int().min(1).max(10),
 })
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.id) {

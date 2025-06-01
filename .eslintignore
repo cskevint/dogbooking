@@ -1,0 +1,14 @@
+src/generated/**/*
+src/types/next-auth.d.ts
+src/generated/prisma/runtime/**/*
+src/generated/prisma/wasm.js
+src/generated/prisma/index.js
+src/generated/prisma/index.d.ts
+src/generated/prisma/edge.js
+src/generated/prisma/edge.d.ts
+src/generated/prisma/runtime/library.js
+src/generated/prisma/runtime/binary.js
+src/generated/prisma/runtime/edge.js
+src/generated/prisma/runtime/edge-esm.js
+src/generated/prisma/runtime/index.js
+src/generated/prisma/runtime/index.d.ts 

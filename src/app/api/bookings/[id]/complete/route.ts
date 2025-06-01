@@ -1,11 +1,13 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+type tParams = Promise<{ id: string }>
+
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: tParams }
 ) {
   const session = await getServerSession(authOptions)
 
@@ -14,10 +16,10 @@ export async function POST(
   }
 
   try {
-    const bookingId = params.id
+    const { id } = await params
 
     // Get the sitter's profile
-    const sitter = await prisma.Sitter.findUnique({
+    const sitter = await prisma.sitter.findUnique({
       where: {
         userId: session.user.id,
       },
@@ -28,9 +30,9 @@ export async function POST(
     }
 
     // Check if the booking exists and belongs to the sitter
-    const booking = await prisma.Booking.findUnique({
+    const booking = await prisma.booking.findUnique({
       where: {
-        id: bookingId,
+        id,
       },
     })
 
@@ -50,9 +52,9 @@ export async function POST(
 
     // Complete the booking and set end date to now
     const now = new Date()
-    const updatedBooking = await prisma.Booking.update({
+    const updatedBooking = await prisma.booking.update({
       where: {
-        id: bookingId,
+        id,
       },
       data: {
         status: 'COMPLETED',

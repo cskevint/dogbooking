@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import SitterList from '@/components/sitters/SitterList'
@@ -17,7 +17,7 @@ export default async function SittersPage() {
     redirect('/auth/signin')
   }
 
-  const sitters = await prisma.Sitter.findMany({
+  const sitters = await prisma.sitter.findMany({
     include: {
       user: {
         select: {

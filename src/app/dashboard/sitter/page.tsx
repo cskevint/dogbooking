@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -42,7 +42,7 @@ export default async function SitterDashboardPage() {
   }
 
   // Get the sitter profile
-  const sitter = await prisma.Sitter.findUnique({
+  const sitter = await prisma.sitter.findUnique({
     where: {
       userId: session.user.id,
     },
@@ -53,10 +53,20 @@ export default async function SitterDashboardPage() {
     redirect('/dashboard/sitter/onboarding')
   }
 
-  // Get recent bookings and stats
-  const bookings = await prisma.Booking.findMany({
+  // Set up date ranges
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+  // Get today's bookings
+  const todayBookings = await prisma.booking.findMany({
     where: {
       sitterId: sitter.id,
+      startDate: {
+        gte: today,
+        lt: tomorrow,
+      },
     },
     include: {
       client: {
@@ -66,15 +76,67 @@ export default async function SitterDashboardPage() {
         },
       },
       dogs: true,
+      sitter: {
+        include: {
+          user: true,
+        },
+      },
+      review: true,
     },
-    orderBy: {
-      startDate: 'desc',
+  })
+
+  // Get pending bookings
+  const pendingBookings = await prisma.booking.findMany({
+    where: {
+      sitterId: sitter.id,
+      status: 'PENDING',
+    },
+    include: {
+      client: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
+      dogs: true,
+      sitter: {
+        include: {
+          user: true,
+        },
+      },
+      review: true,
+    },
+  })
+
+  // Get upcoming confirmed bookings
+  const upcomingBookings = await prisma.booking.findMany({
+    where: {
+      sitterId: sitter.id,
+      status: 'CONFIRMED',
+      startDate: {
+        gt: today,
+      },
+    },
+    include: {
+      client: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
+      dogs: true,
+      sitter: {
+        include: {
+          user: true,
+        },
+      },
+      review: true,
     },
     take: 5,
   })
 
   // Calculate stats
-  const stats = await prisma.Booking.groupBy({
+  const stats = await prisma.booking.groupBy({
     by: ['status'],
     where: {
       sitterId: sitter.id,
@@ -82,7 +144,7 @@ export default async function SitterDashboardPage() {
     _count: true,
   })
 
-  const totalEarnings = await prisma.Booking.aggregate({
+  const totalEarnings = await prisma.booking.aggregate({
     where: {
       sitterId: sitter.id,
       status: 'COMPLETED',
@@ -201,9 +263,9 @@ export default async function SitterDashboardPage() {
       <div className="mt-8">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Recent Bookings</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Today's Bookings</h3>
             <p className="mt-2 text-sm text-gray-700">
-              A list of your most recent bookings and their current status.
+              A list of your bookings for today.
             </p>
           </div>
         </div>
@@ -233,7 +295,7 @@ export default async function SitterDashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {bookings.map((booking: Booking) => (
+                    {todayBookings.map((booking: Booking) => (
                       <tr key={booking.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                           <div className="font-medium text-gray-900">{booking.client.name}</div>
@@ -258,15 +320,172 @@ export default async function SitterDashboardPage() {
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          ${booking.totalPrice.toFixed(2)}
+                          ${(booking.totalPrice || 0).toFixed(2)}
                         </td>
                       </tr>
                     ))}
-
-                    {bookings.length === 0 && (
+                    {todayBookings.length === 0 && (
                       <tr>
                         <td colSpan={5} className="py-8 text-center text-sm text-gray-500">
-                          No bookings yet
+                          No bookings today
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <div className="sm:flex sm:items-center">
+          <div className="sm:flex-auto">
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Pending Bookings</h3>
+            <p className="mt-2 text-sm text-gray-700">
+              A list of your pending bookings.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 flow-root">
+          <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-300">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                        Client
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Dogs
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Dates
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Status
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Price
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {pendingBookings.map((booking: Booking) => (
+                      <tr key={booking.id}>
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                          <div className="font-medium text-gray-900">{booking.client.name}</div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {booking.dogs.map((dog: Dog) => dog.name).join(', ')}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <div>
+                            <div>{new Date(booking.startDate).toLocaleDateString()}</div>
+                            <div>{new Date(booking.endDate).toLocaleDateString()}</div>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <span
+                            className={classNames(
+                              getStatusColor(booking.status),
+                              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium'
+                            )}
+                          >
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          ${(booking.totalPrice || 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                    {pendingBookings.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-sm text-gray-500">
+                          No pending bookings
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <div className="sm:flex sm:items-center">
+          <div className="sm:flex-auto">
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Upcoming Bookings</h3>
+            <p className="mt-2 text-sm text-gray-700">
+              A list of your upcoming confirmed bookings.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 flow-root">
+          <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-300">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                        Client
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Dogs
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Dates
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Status
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Price
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {upcomingBookings.map((booking: Booking) => (
+                      <tr key={booking.id}>
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                          <div className="font-medium text-gray-900">{booking.client.name}</div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {booking.dogs.map((dog: Dog) => dog.name).join(', ')}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <div>
+                            <div>{new Date(booking.startDate).toLocaleDateString()}</div>
+                            <div>{new Date(booking.endDate).toLocaleDateString()}</div>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <span
+                            className={classNames(
+                              getStatusColor(booking.status),
+                              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium'
+                            )}
+                          >
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          ${(booking.totalPrice || 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                    {upcomingBookings.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-sm text-gray-500">
+                          No upcoming bookings
                         </td>
                       </tr>
                     )}

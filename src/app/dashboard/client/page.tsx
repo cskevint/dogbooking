@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { CalendarDaysIcon, PlusIcon, UserGroupIcon } from '@heroicons/react/24/outline'
@@ -17,7 +17,7 @@ export default async function ClientDashboard() {
   }
 
   const [dogs, upcomingBookings] = await Promise.all([
-    prisma.Dog.findMany({
+    prisma.dog.findMany({
       where: {
         ownerId: session.user.id,
       },
@@ -25,21 +25,25 @@ export default async function ClientDashboard() {
         createdAt: 'desc',
       },
     }),
-    prisma.Booking.findMany({
+    prisma.booking.findMany({
       where: {
         clientId: session.user.id,
         status: {
           in: ['PENDING', 'CONFIRMED'],
         },
-        startDate: {
-          gte: new Date(),
-        },
       },
       include: {
-        dogs: true,
         sitter: {
           include: {
             user: true,
+          },
+        },
+        dogs: true,
+        review: true,
+        client: {
+          select: {
+            name: true,
+            image: true,
           },
         },
       },
